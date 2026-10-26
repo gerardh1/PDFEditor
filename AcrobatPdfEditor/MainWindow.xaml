@@ -1,0 +1,1167 @@
+﻿<Window x:Class="AcrobatPdfEditor.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d"
+        Title="ArcoCat PDF Editor — Windows PDF Reader &amp; Editor"
+        Icon="pack://application:,,,/Assets/ArcoCatIcon.ico"
+        Width="1280" Height="800"
+        MinWidth="680" MinHeight="460"
+        WindowStyle="SingleBorderWindow"
+        ResizeMode="CanResizeWithGrip"
+        WindowStartupLocation="CenterScreen"
+        Background="#181B20"
+        Foreground="#F1F5F9"
+        StateChanged="Window_StateChanged"
+        KeyDown="Window_KeyDown"
+        Closing="Window_Closing">
+
+    <Window.Resources>
+        <!-- Modern Toolbar Button Style -->
+        <Style x:Key="ToolBtn" TargetType="Button">
+            <Setter Property="Background" Value="#262B33"/>
+            <Setter Property="Foreground" Value="#E2E8F0"/>
+            <Setter Property="BorderBrush" Value="#363D49"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Padding" Value="9,5"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4"
+                                Padding="{TemplateBinding Padding}">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#343B46"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#4F5868"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#E53935"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Primary Accent Button Style -->
+        <Style x:Key="PrimaryBtn" TargetType="Button" BasedOn="{StaticResource ToolBtn}">
+            <Setter Property="Background" Value="#D32F2F"/>
+            <Setter Property="BorderBrush" Value="#E53935"/>
+            <Setter Property="Foreground" Value="#FFFFFF"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+        </Style>
+
+        <!-- Photoshop Left Tool Dock Button Style -->
+        <Style x:Key="PsDockToolBtn" TargetType="Button">
+            <Setter Property="Background" Value="#262B33"/>
+            <Setter Property="Foreground" Value="#E2E8F0"/>
+            <Setter Property="BorderBrush" Value="#363D49"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="Width" Value="36"/>
+            <Setter Property="Height" Value="32"/>
+            <Setter Property="Margin" Value="0,2"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#363E4C"/>
+                                <Setter TargetName="border" Property="BorderBrush" Value="#60A5FA"/>
+                            </Trigger>
+                            <Trigger Property="IsPressed" Value="True">
+                                <Setter TargetName="border" Property="Background" Value="#E53935"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <!-- Dark Acrobat/Photoshop Menu Styling -->
+        <Style TargetType="Menu">
+            <Setter Property="Background" Value="#14171D"/>
+            <Setter Property="Foreground" Value="#E2E8F0"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <Style TargetType="MenuItem">
+            <Setter Property="Background" Value="#1E232B"/>
+            <Setter Property="Foreground" Value="#E2E8F0"/>
+            <Setter Property="Padding" Value="8,4"/>
+            <Style.Triggers>
+                <Trigger Property="Role" Value="TopLevelHeader">
+                    <Setter Property="Background" Value="Transparent"/>
+                    <Setter Property="Padding" Value="10,4"/>
+                    <Setter Property="FontWeight" Value="Medium"/>
+                </Trigger>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="#2D3748"/>
+                    <Setter Property="Foreground" Value="#FFFFFF"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <!-- Group Header Label -->
+        <Style x:Key="RibbonGroupLabel" TargetType="TextBlock">
+            <Setter Property="FontSize" Value="10"/>
+            <Setter Property="Foreground" Value="#8A94A6"/>
+            <Setter Property="HorizontalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="0,3,0,0"/>
+        </Style>
+    </Window.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <!-- Top Acrobat/Photoshop Menu Bar -->
+            <RowDefinition Height="28"/>
+            <!-- Top App Bar -->
+            <RowDefinition Height="46"/>
+            <!-- Acrobat Tool Ribbon -->
+            <RowDefinition Height="Auto"/>
+            <!-- Multi-Document Tab Bar -->
+            <RowDefinition Height="34"/>
+            <!-- Main Workspace -->
+            <RowDefinition Height="*"/>
+            <!-- Status Bar -->
+            <RowDefinition Height="30"/>
+        </Grid.RowDefinitions>
+
+        <!-- ==================== 0. ACROBAT / PHOTOSHOP STYLE MENU BAR (DRAGGABLE HEADER) ==================== -->
+        <Border Grid.Row="0" Background="#14171D" BorderBrush="#262B35" BorderThickness="0,0,0,1" Padding="6,0"
+                MouseLeftButtonDown="TopWindowDragBar_MouseLeftButtonDown">
+            <DockPanel LastChildFill="True">
+                <Menu DockPanel.Dock="Left" VerticalAlignment="Center" Background="Transparent">
+                    <MenuItem Header="_File">
+                        <MenuItem Header="📂 _Open PDF..." InputGestureText="Ctrl+O" Click="OpenPdf_Click"/>
+                        <MenuItem Header="📄 _New Sample Document Tab" Click="NewSamplePdf_Click"/>
+                        <MenuItem Header="↺ _Reopen Closed Document Tab" InputGestureText="Ctrl+Shift+T" Click="ReopenClosedTab_Click"/>
+                        <MenuItem Header="✕ _Close Current Document Tab" InputGestureText="Ctrl+W" Click="CloseActiveTab_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="💾 _Save PDF" InputGestureText="Ctrl+S" Click="SavePdf_Click"/>
+                        <MenuItem Header="💾 Save _As..." Click="SavePdfAs_Click"/>
+                        <MenuItem Header="🔥 Apply &amp; _Flatten All Edits to PDF" Click="FlattenAnnotations_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="🖼 Export Current Page as _PNG..." Click="ExportPng_Click"/>
+                        <MenuItem Header="📝 Export Full _Text..." Click="ExportText_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="🗑 _Uninstall Application..." Click="UninstallApp_Click"/>
+                        <MenuItem Header="🚪 E_xit Application" InputGestureText="Alt+F4" Click="ExitApp_Click"/>
+                    </MenuItem>
+
+                    <MenuItem Header="_Edit">
+                        <MenuItem Header="↩ _Undo" InputGestureText="Ctrl+Z" Click="Undo_Click"/>
+                        <MenuItem Header="↪ _Redo" InputGestureText="Ctrl+Y" Click="Redo_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="🔍 _Find / Search in Document..." InputGestureText="Ctrl+F" Click="FocusFindBox_Click"/>
+                        <MenuItem Header="▶ Find _Next Match" InputGestureText="F3" Click="NextSearchMatch_Click"/>
+                        <MenuItem Header="◀ Find _Previous Match" InputGestureText="Shift+F3" Click="PrevSearchMatch_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="✏ _Edit PDF Text In-Place" Click="SelectTool_Click" Tag="EditText"/>
+                        <MenuItem Header="🔤 _Add Text Box" Click="SelectTool_Click" Tag="AddText"/>
+                        <MenuItem Header="🖼 Insert _Image..." Click="InsertImageTool_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="📋 _Duplicate Selected Item" Click="DuplicateAnnotation_Click"/>
+                        <MenuItem Header="🗑 _Delete Selected Item" InputGestureText="Del" Click="DeleteAnnotation_Click"/>
+                        <MenuItem Header="🧹 Clear Current Page Annotations" Click="ClearPageAnnotations_Click"/>
+                    </MenuItem>
+
+                    <MenuItem Header="_View">
+                        <MenuItem Header="🔍 Zoom _In" InputGestureText="Ctrl++" Click="ZoomIn_Click"/>
+                        <MenuItem Header="🔍 Zoom _Out" InputGestureText="Ctrl+-" Click="ZoomOut_Click"/>
+                        <MenuItem Header="🗔 Fit _Page" Click="FitPage_Click"/>
+                        <MenuItem Header="↔ Fit _Width" Click="FitWidth_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="⏮ _First Page" Click="FirstPage_Click"/>
+                        <MenuItem Header="◀ _Previous Page" Click="PrevPage_Click"/>
+                        <MenuItem Header="▶ _Next Page" Click="NextPage_Click"/>
+                        <MenuItem Header="⏭ _Last Page" Click="LastPage_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="🗕 Mi_nimize Window" Click="MinimizeWindow_Click"/>
+                        <MenuItem Header="🗖 Ma_ximize / Restore Window" InputGestureText="F11" Click="MaximizeRestoreWindow_Click"/>
+                        <MenuItem Header="📐 Window Size: Compact (1080 × 700)" Click="PresetWindowCompact_Click"/>
+                        <MenuItem Header="📐 Window Size: Standard (1280 × 820)" Click="PresetWindowStandard_Click"/>
+                        <MenuItem Header="🎯 Center Window on Screen" Click="CenterWindowOnScreen_Click"/>
+                    </MenuItem>
+
+                    <MenuItem Header="_Tools (Photoshop / Acrobat)">
+                        <MenuItem Header="🖱 Move / Transform Tool (Resize &amp; Drag)" Click="SelectTool_Click" Tag="Select"/>
+                        <MenuItem Header="✋ Hand Pan Tool" Click="SelectTool_Click" Tag="Pan"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="🖍 Highlight Text" Click="SelectTool_Click" Tag="Highlight"/>
+                        <MenuItem Header="U̲ Underline Text" Click="SelectTool_Click" Tag="Underline"/>
+                        <MenuItem Header="S̶ Strikethrough Text" Click="SelectTool_Click" Tag="Strikethrough"/>
+                        <MenuItem Header="💬 Sticky Note / Comment" Click="SelectTool_Click" Tag="StickyNote"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="✒ Brush / Freehand Ink" Click="SelectTool_Click" Tag="Freehand"/>
+                        <MenuItem Header="▭ Rectangle Shape" Click="SelectTool_Click" Tag="Rectangle"/>
+                        <MenuItem Header="◯ Ellipse Shape" Click="SelectTool_Click" Tag="Ellipse"/>
+                        <MenuItem Header="↗ Line / Arrow Tool" Click="SelectTool_Click" Tag="Line"/>
+                        <MenuItem Header="🏷 Rubber Stamp Tool" Click="SelectTool_Click" Tag="Stamp"/>
+                    </MenuItem>
+
+                    <MenuItem Header="_Sign &amp; Protect">
+                        <MenuItem Header="✍ Fill &amp; _Sign Signature..." Click="OpenSignatureDialog_Click"/>
+                        <MenuItem Header="💧 Add / Edit _Watermark..." Click="OpenWatermarkDialog_Click"/>
+                        <MenuItem Header="↩ _Undo Last Watermark / Edit" InputGestureText="Ctrl+Z" Click="Undo_Click"/>
+                        <MenuItem Header="# Add Header / Footer _Page Numbers" Click="AddPageNumbers_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="⬛ _Mark Area for Redaction" Click="SelectTool_Click" Tag="Redact"/>
+                        <MenuItem Header="🔥 _Apply Redactions &amp; Flatten" Click="FlattenAnnotations_Click"/>
+                    </MenuItem>
+
+                    <MenuItem Header="_Organize Pages">
+                        <MenuItem Header="↺ Rotate Page _Left (90° CCW)" Click="RotateLeft_Click"/>
+                        <MenuItem Header="↻ Rotate Page _Right (90° CW)" Click="RotateRight_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="➕ Insert _Blank Page" Click="InsertBlankPage_Click"/>
+                        <MenuItem Header="📋 _Duplicate Current Page" Click="DuplicatePage_Click"/>
+                        <MenuItem Header="⬆ Move Page _Up" Click="MovePageUp_Click"/>
+                        <MenuItem Header="⬇ Move Page _Down" Click="MovePageDown_Click"/>
+                        <MenuItem Header="🗑 _Delete Current Page" Click="DeletePage_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="🔗 _Merge PDF Files..." Click="MergePdfs_Click"/>
+                        <MenuItem Header="✂ _Extract Current Page to PDF..." Click="ExtractCurrentPage_Click"/>
+                    </MenuItem>
+
+                    <MenuItem Header="_Window &amp; Tabs">
+                        <MenuItem Header="↺ _Reopen Closed Document Tab" InputGestureText="Ctrl+Shift+T" Click="ReopenClosedTab_Click"/>
+                        <MenuItem Header="📄 Open _New Sample Tab" Click="NewSamplePdf_Click"/>
+                        <MenuItem Header="✕ _Close Active Document Tab" InputGestureText="Ctrl+W" Click="CloseActiveTab_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="📑 Toggle / Reopen 'Pages' Tab" Click="TogglePagesTab_Click"/>
+                        <MenuItem Header="🔖 Toggle / Reopen 'Outline' Tab" Click="ToggleOutlineTab_Click"/>
+                        <MenuItem Header="🔍 Toggle / Reopen 'Search' Tab" Click="ToggleSearchTab_Click"/>
+                        <MenuItem Header="⚙ Toggle / Reopen 'Properties Inspector' Panel" Click="ToggleRightInspector_Click"/>
+                        <MenuItem Header="🧰 Toggle / Reopen 'Left Tool Dock'" Click="ToggleToolDock_Click"/>
+                        <MenuItem Header="🎀 Toggle / Reopen 'Top Ribbon Toolbar'" Click="ToggleRibbon_Click"/>
+                        <Separator Background="#323946"/>
+                        <MenuItem Header="🔄 _Restore All Closed Workspace Tabs &amp; Panels" Click="RestoreAllWorkspaceTabs_Click"/>
+                    </MenuItem>
+                </Menu>
+
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="📐 Fit Screen" Click="PresetWindowStandard_Click"
+                            Background="#222731" Foreground="#93C5FD" BorderBrush="#363D49" BorderThickness="1"
+                            Padding="8,1" Margin="2,3" FontSize="11" Cursor="Hand"
+                            ToolTip="Restore &amp; Fit Window comfortably inside screen bounds"/>
+                    <Button x:Name="BtnMinimizeWin" Content="🗕 Minimize" Click="MinimizeWindow_Click"
+                            Background="#222731" Foreground="#CBD5E1" BorderBrush="#363D49" BorderThickness="1"
+                            Padding="8,1" Margin="2,3" FontSize="11" Cursor="Hand"
+                            ToolTip="Minimize Window"/>
+                    <Button x:Name="BtnMaxRestoreWin" Content="🗖 Maximize" Click="MaximizeRestoreWindow_Click"
+                            Background="#222731" Foreground="#CBD5E1" BorderBrush="#363D49" BorderThickness="1"
+                            Padding="8,1" Margin="2,3" FontSize="11" Cursor="Hand"
+                            ToolTip="Maximize or Restore Window (F11)"/>
+                    <Button Content="🚪 Exit" Click="ExitApp_Click"
+                            Background="#3B1D24" Foreground="#FCA5A5" BorderBrush="#7F1D1D" BorderThickness="1"
+                            Padding="10,1" Margin="4,3,2,3" FontSize="11.5" FontWeight="SemiBold" Cursor="Hand"
+                            ToolTip="Exit Application (Alt+F4)"/>
+                </StackPanel>
+
+                <!-- Draggable Window Title Region -->
+                <Border Background="Transparent" Cursor="SizeAll"
+                        MouseLeftButtonDown="TopWindowDragBar_MouseLeftButtonDown"
+                        ToolTip="Drag here to move window (Double-click to Maximize / Restore)">
+                    <TextBlock Text="✥ Drag here to move window" Foreground="#64748B" FontSize="11"
+                               VerticalAlignment="Center" HorizontalAlignment="Center"/>
+                </Border>
+            </DockPanel>
+        </Border>
+
+        <!-- ==================== 1. TOP APPLICATION BAR ==================== -->
+        <Border Grid.Row="1" Background="#121418" BorderBrush="#2A2F3A" BorderThickness="0,0,0,1" Padding="10,0"
+                MouseLeftButtonDown="TopWindowDragBar_MouseLeftButtonDown">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Brand Logo (Transparent ArcoCat Icon) + Title -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <Image Source="pack://application:,,,/Assets/ArcoCatIcon.png"
+                           Width="36" Height="36" Margin="0,0,8,0"
+                           RenderOptions.BitmapScalingMode="HighQuality"/>
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="ArcoCat PDF Editor" FontWeight="Bold" FontSize="13.5" Foreground="#FFFFFF"/>
+                        <TextBlock Text="PDF Reader &amp; Editor Studio" FontSize="9.5" Foreground="#8A94A6"/>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Quick File & History Actions -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Style="{StaticResource PrimaryBtn}" Content="📂 Open..." Click="OpenPdf_Click" ToolTip="Open an existing PDF file (Ctrl+O)"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="📄 Sample" Click="NewSamplePdf_Click" ToolTip="Generate a multi-page sample PDF to test editing &amp; markup"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="💾 Save" Click="SavePdf_Click" ToolTip="Save PDF with all text edits &amp; annotations baked in (Ctrl+S)"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="💾 Save As" Click="SavePdfAs_Click" ToolTip="Save modified PDF to a new file"/>
+                    <Separator Width="1" Background="#2E3440" Margin="6,6"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="↩ Undo" Click="Undo_Click" ToolTip="Undo last annotation, image resize, watermark, or page edit (Ctrl+Z)"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="↪ Redo" Click="Redo_Click" ToolTip="Redo last undone action (Ctrl+Y)"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="🔥 Flatten" Click="FlattenAnnotations_Click"
+                            Background="#1E3A5F" BorderBrush="#2563EB"
+                            ToolTip="Permanently bake current annotations, text edits, and redactions into the PDF page stream"/>
+                </StackPanel>
+
+                <!-- Right Search Box, Match Navigation, Export & Exit -->
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border Background="#161A22" BorderBrush="#3B82F6" BorderThickness="1" CornerRadius="4" Padding="6,2" Margin="0,0,6,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="🔍" VerticalAlignment="Center" Margin="0,0,5,0" FontSize="12"/>
+                            <TextBox x:Name="SearchBox" Width="155" Background="#161A22" Foreground="#FFFFFF"
+                                     CaretBrush="#FFFFFF" SelectionBrush="#2563EB"
+                                     BorderThickness="0" VerticalContentAlignment="Center" FontSize="12"
+                                     ToolTip="Type text to search across all pages (Press Enter to Find / Next Match)"
+                                     TextChanged="SearchBox_TextChanged"
+                                     KeyDown="SearchBox_KeyDown"/>
+                            <TextBlock x:Name="SearchMatchCounterText" Text="" Foreground="#93C5FD" FontSize="11"
+                                       FontWeight="SemiBold" VerticalAlignment="Center" Margin="6,0,4,0"/>
+                            <Button Content="Find" Style="{StaticResource PrimaryBtn}" Padding="8,2" Margin="2,0"
+                                    Click="SearchButton_Click" ToolTip="Search text in PDF (Enter)"/>
+                            <Button Content="◀" Style="{StaticResource ToolBtn}" Padding="5,2"
+                                    Click="PrevSearchMatch_Click" ToolTip="Previous Match (Shift+F3)"/>
+                            <Button Content="▶" Style="{StaticResource ToolBtn}" Padding="5,2"
+                                    Click="NextSearchMatch_Click" ToolTip="Next Match (F3)"/>
+                            <Button Content="✕" Style="{StaticResource ToolBtn}" Padding="5,2"
+                                    Click="ClearSearch_Click" ToolTip="Clear search highlights"/>
+                        </StackPanel>
+                    </Border>
+                    <Button Style="{StaticResource ToolBtn}" Content="🖼 PNG" Click="ExportPng_Click" ToolTip="Export current page as high-resolution PNG image"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="📝 Text" Click="ExportText_Click" ToolTip="Extract and export all text from the PDF"/>
+                    <Button Style="{StaticResource ToolBtn}" Content="🚪 Exit" Click="ExitApp_Click"
+                            Background="#451A1A" BorderBrush="#7F1D1D" Foreground="#FCA5A5" Margin="4,0,0,0"
+                            ToolTip="Exit Application"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ==================== 2. ACROBAT / PHOTOSHOP CATEGORIZED RIBBON ==================== -->
+        <Border x:Name="RibbonHostBorder" Grid.Row="2" Background="#1F242D" BorderBrush="#2E3440" BorderThickness="0,0,0,1" Padding="6,2">
+            <Grid>
+                <TabControl x:Name="RibbonTabControl" Background="Transparent" BorderThickness="0" Padding="0,4,0,2">
+                    <TabControl.Resources>
+                        <Style TargetType="TabItem">
+                            <Setter Property="Foreground" Value="#94A3B8"/>
+                            <Setter Property="FontSize" Value="12"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                            <Setter Property="Padding" Value="12,5"/>
+                            <Setter Property="Margin" Value="0,0,3,0"/>
+                            <Setter Property="Cursor" Value="Hand"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="TabItem">
+                                        <Border x:Name="Bd" Background="#181C24" BorderBrush="#2D3545" BorderThickness="1,1,1,0"
+                                                CornerRadius="5,5,0,0" Padding="{TemplateBinding Padding}" Margin="{TemplateBinding Margin}">
+                                            <ContentPresenter ContentSource="Header" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="Bd" Property="Background" Value="#28303F"/>
+                                                <Setter TargetName="Bd" Property="BorderBrush" Value="#E53935"/>
+                                                <Setter TargetName="Bd" Property="BorderThickness" Value="1,2,1,0"/>
+                                                <Setter Property="Foreground" Value="#FFFFFF"/>
+                                            </Trigger>
+                                            <Trigger Property="IsMouseOver" Value="True">
+                                                <Setter Property="Foreground" Value="#F8FAFC"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </TabControl.Resources>
+
+                    <!-- Tab 1: Home & All Quick Tools -->
+                    <TabItem Header="🏠 Home &amp; Edit PDF">
+                        <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="2,4,2,2">
+                            <Border BorderBrush="#323946" BorderThickness="0,0,1,0" Padding="0,0,8,0" Margin="0,0,8,0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button x:Name="BtnToolSelect" Style="{StaticResource ToolBtn}" Content="🖱 Move / Resize" Click="SelectTool_Click" Tag="Select" ToolTip="Select, move, or drag corner handles to resize images, signatures, and annotations"/>
+                                        <Button x:Name="BtnToolPan" Style="{StaticResource ToolBtn}" Content="✋ Hand Pan" Click="SelectTool_Click" Tag="Pan" ToolTip="Drag page to pan around"/>
+                                    </StackPanel>
+                                    <TextBlock Text="SELECT &amp; TRANSFORM" Style="{StaticResource RibbonGroupLabel}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border BorderBrush="#323946" BorderThickness="0,0,1,0" Padding="0,0,8,0" Margin="0,0,8,0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button x:Name="BtnToolEditText" Style="{StaticResource ToolBtn}" Content="✏ Edit PDF Text" Click="SelectTool_Click" Tag="EditText"
+                                                ToolTip="Detect existing text lines in the PDF and click any line to edit or replace it in-place"/>
+                                        <Button x:Name="BtnToolAddText" Style="{StaticResource ToolBtn}" Content="🔤 Add Text Box" Click="SelectTool_Click" Tag="AddText"
+                                                ToolTip="Click anywhere on the page to insert a new text box"/>
+                                        <Button Style="{StaticResource ToolBtn}" Content="🖼 Add Image..." Click="InsertImageTool_Click"
+                                                ToolTip="Insert an image (PNG/JPG/BMP) onto the current PDF page (drag handles to resize)"/>
+                                    </StackPanel>
+                                    <TextBlock Text="EDIT PDF &amp; IMAGES" Style="{StaticResource RibbonGroupLabel}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border BorderBrush="#323946" BorderThickness="0,0,1,0" Padding="0,0,8,0" Margin="0,0,8,0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Style="{StaticResource ToolBtn}" Content="✍ Fill &amp; Sign..." Click="OpenSignatureDialog_Click"
+                                                ToolTip="Draw or type your signature and place it on the page"/>
+                                        <Button Style="{StaticResource ToolBtn}" Content="💧 Watermark..." Click="OpenWatermarkDialog_Click"
+                                                ToolTip="Add diagonal or horizontal watermark across pages (Supports Undo Ctrl+Z)"/>
+                                        <Button Style="{StaticResource ToolBtn}" Content="↩ Undo Watermark / Edit" Click="Undo_Click"
+                                                ToolTip="Undo last watermark, page operation, or annotation"/>
+                                    </StackPanel>
+                                    <TextBlock Text="SIGN &amp; WATERMARK" Style="{StaticResource RibbonGroupLabel}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Style="{StaticResource ToolBtn}" Content="↺ Rotate L" Click="RotateLeft_Click" ToolTip="Rotate current page 90° counter-clockwise"/>
+                                    <Button Style="{StaticResource ToolBtn}" Content="↻ Rotate R" Click="RotateRight_Click" ToolTip="Rotate current page 90° clockwise"/>
+                                    <Button Style="{StaticResource ToolBtn}" Content="🚪 Exit" Click="ExitApp_Click" Background="#451A1A" BorderBrush="#7F1D1D" Foreground="#FCA5A5"/>
+                                </StackPanel>
+                                <TextBlock Text="QUICK PAGE &amp; APP" Style="{StaticResource RibbonGroupLabel}"/>
+                            </StackPanel>
+                        </WrapPanel>
+                    </TabItem>
+
+                    <!-- Tab 2: Comment, Markup & Drawing -->
+                    <TabItem Header="💬 Comment &amp; Markup">
+                        <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="2,4,2,2">
+                            <Border BorderBrush="#323946" BorderThickness="0,0,1,0" Padding="0,0,8,0" Margin="0,0,8,0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button x:Name="BtnToolHighlight" Style="{StaticResource ToolBtn}" Content="🖍 Highlight" Click="SelectTool_Click" Tag="Highlight" ToolTip="Drag to highlight text"/>
+                                        <Button x:Name="BtnToolUnderline" Style="{StaticResource ToolBtn}" Content="U̲ Underline" Click="SelectTool_Click" Tag="Underline" ToolTip="Drag to underline text"/>
+                                        <Button x:Name="BtnToolStrike" Style="{StaticResource ToolBtn}" Content="S̶ Strike" Click="SelectTool_Click" Tag="Strikethrough" ToolTip="Drag to strikethrough text"/>
+                                        <Button x:Name="BtnToolSticky" Style="{StaticResource ToolBtn}" Content="💬 Sticky Note" Click="SelectTool_Click" Tag="StickyNote" ToolTip="Click on the page to add a comment / sticky note"/>
+                                    </StackPanel>
+                                    <TextBlock Text="TEXT MARKUP &amp; NOTES" Style="{StaticResource RibbonGroupLabel}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="BtnToolFreehand" Style="{StaticResource ToolBtn}" Content="✒ Draw Ink" Click="SelectTool_Click" Tag="Freehand" ToolTip="Freehand pen drawing on the page"/>
+                                    <Button x:Name="BtnToolRect" Style="{StaticResource ToolBtn}" Content="▭ Box" Click="SelectTool_Click" Tag="Rectangle" ToolTip="Draw rectangle"/>
+                                    <Button x:Name="BtnToolEllipse" Style="{StaticResource ToolBtn}" Content="◯ Circle" Click="SelectTool_Click" Tag="Ellipse" ToolTip="Draw circle/ellipse"/>
+                                    <Button x:Name="BtnToolLine" Style="{StaticResource ToolBtn}" Content="↗ Arrow" Click="SelectTool_Click" Tag="Line" ToolTip="Draw line with arrowhead"/>
+                                    <ComboBox x:Name="StampPresetCombo" Width="112" SelectedIndex="0" Margin="4,0,2,0" VerticalContentAlignment="Center"
+                                              ToolTip="Select rubber stamp text">
+                                        <ComboBoxItem Content="APPROVED"/>
+                                        <ComboBoxItem Content="CONFIDENTIAL"/>
+                                        <ComboBoxItem Content="DRAFT"/>
+                                        <ComboBoxItem Content="FINAL"/>
+                                        <ComboBoxItem Content="FOR REVIEW"/>
+                                        <ComboBoxItem Content="VOID"/>
+                                        <ComboBoxItem Content="URGENT"/>
+                                    </ComboBox>
+                                    <Button x:Name="BtnToolStamp" Style="{StaticResource ToolBtn}" Content="🏷 Stamp" Click="SelectTool_Click" Tag="Stamp" ToolTip="Click on page to place the selected rubber stamp"/>
+                                </StackPanel>
+                                <TextBlock Text="DRAWING, SHAPES &amp; STAMPS" Style="{StaticResource RibbonGroupLabel}"/>
+                            </StackPanel>
+                        </WrapPanel>
+                    </TabItem>
+
+                    <!-- Tab 3: Fill & Sign, Watermark & Redact -->
+                    <TabItem Header="✍ Fill, Sign &amp; Protect">
+                        <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="2,4,2,2">
+                            <Border BorderBrush="#323946" BorderThickness="0,0,1,0" Padding="0,0,8,0" Margin="0,0,8,0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Style="{StaticResource PrimaryBtn}" Content="✍ Fill &amp; Sign Signature..." Click="OpenSignatureDialog_Click"
+                                                ToolTip="Draw or type your signature and place it on the page"/>
+                                        <Button Style="{StaticResource ToolBtn}" Content="🖼 Insert Image / Seal..." Click="InsertImageTool_Click"
+                                                ToolTip="Insert an image or company seal and resize it on the page"/>
+                                    </StackPanel>
+                                    <TextBlock Text="DIGITAL SIGNATURE &amp; SEAL" Style="{StaticResource RibbonGroupLabel}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <Border BorderBrush="#323946" BorderThickness="0,0,1,0" Padding="0,0,8,0" Margin="0,0,8,0">
+                                <StackPanel>
+                                    <StackPanel Orientation="Horizontal">
+                                        <Button Style="{StaticResource ToolBtn}" Content="💧 Add Watermark..." Click="OpenWatermarkDialog_Click"
+                                                ToolTip="Add diagonal or horizontal watermark across pages"/>
+                                        <Button Style="{StaticResource ToolBtn}" Content="↩ Undo Watermark" Click="Undo_Click"
+                                                ToolTip="Undo watermark or previous change (Ctrl+Z)"/>
+                                        <Button Style="{StaticResource ToolBtn}" Content="# Header &amp; Page Numbers" Click="AddPageNumbers_Click"
+                                                ToolTip="Add running header and 'Page X of Y' footer across all pages"/>
+                                    </StackPanel>
+                                    <TextBlock Text="WATERMARK &amp; BATES NUMBERING" Style="{StaticResource RibbonGroupLabel}"/>
+                                </StackPanel>
+                            </Border>
+
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button x:Name="BtnToolRedact" Style="{StaticResource ToolBtn}" Content="⬛ Mark Redaction Area" Click="SelectTool_Click" Tag="Redact"
+                                            ToolTip="Drag over sensitive text or graphics to black out / redact"/>
+                                    <Button Style="{StaticResource ToolBtn}" Content="🔥 Apply &amp; Flatten Redactions" Click="FlattenAnnotations_Click"
+                                            Background="#1E3A5F" BorderBrush="#2563EB"/>
+                                </StackPanel>
+                                <TextBlock Text="REDACT &amp; SANITIZE" Style="{StaticResource RibbonGroupLabel}"/>
+                            </StackPanel>
+                        </WrapPanel>
+                    </TabItem>
+
+                    <!-- Tab 4: Organize Pages -->
+                    <TabItem Header="📑 Organize Pages">
+                        <WrapPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="2,4,2,2">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Button Style="{StaticResource ToolBtn}" Content="↺ Rotate Left" Click="RotateLeft_Click" ToolTip="Rotate current page 90° counter-clockwise"/>
+                                    <Button Style="{StaticResource ToolBtn}" Content="↻ Rotate Right" Click="RotateRight_Click" ToolTip="Rotate current page 90° clockwise"/>
+                                    <Button Style="{StaticResource ToolBtn}" Content="➕ Insert Blank Page" Click="InsertBlankPage_Click" ToolTip="Insert a blank PDF page after the current page"/>
+                                    <Button Style="{StaticResource ToolBtn}" Content="📋 Duplicate Page" Click="DuplicatePage_Click" ToolTip="Duplicate current page"/>
+                                    <Button Style="{StaticResource ToolBtn}" Content="⬆ Move Page Up" Click="MovePageUp_Click" ToolTip="Move current page earlier in document"/>
+                                    <Button Style="{StaticResource ToolBtn}" Content="⬇ Move Page Down" Click="MovePageDown_Click" ToolTip="Move current page later in document"/>
+                                    <Button Style="{StaticResource ToolBtn}" Content="🗑 Delete Page" Click="DeletePage_Click" ToolTip="Delete current page from PDF"/>
+                                    <Button Style="{StaticResource ToolBtn}" Content="🔗 Merge PDFs..." Click="MergePdfs_Click" ToolTip="Combine multiple PDF files into this document"/>
+                                    <Button Style="{StaticResource ToolBtn}" Content="✂ Extract Page..." Click="ExtractCurrentPage_Click" ToolTip="Extract current page into a standalone PDF file"/>
+                                </StackPanel>
+                                <TextBlock Text="PAGE ROTATION, ORDER, MERGE &amp; SPLIT" Style="{StaticResource RibbonGroupLabel}"/>
+                            </StackPanel>
+                        </WrapPanel>
+                    </TabItem>
+                </TabControl>
+
+                <Button Content="✕ Hide Ribbon" HorizontalAlignment="Right" VerticalAlignment="Top"
+                        Margin="0,2,4,0" Padding="7,2" FontSize="10.5"
+                        Style="{StaticResource ToolBtn}" Click="ToggleRibbon_Click"
+                        ToolTip="Close/Hide Ribbon Toolbar (Click '🎀 Ribbon' on the tab bar to reopen)"/>
+            </Grid>
+        </Border>
+
+        <!-- ==================== 3. MULTI-TAB DOCUMENT BAR ==================== -->
+        <Border Grid.Row="3" Background="#15181E" BorderBrush="#2A2F3A" BorderThickness="0,0,0,1" Padding="8,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Document Tabs List -->
+                <ListBox x:Name="DocumentTabsList" Grid.Column="0"
+                         Background="Transparent" BorderThickness="0"
+                         ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                         ScrollViewer.VerticalScrollBarVisibility="Disabled"
+                         SelectionChanged="DocumentTabsList_SelectionChanged">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemContainerStyle>
+                        <Style TargetType="ListBoxItem">
+                            <Setter Property="Padding" Value="0"/>
+                            <Setter Property="Margin" Value="0,3,4,0"/>
+                            <Setter Property="Template">
+                                <Setter.Value>
+                                    <ControlTemplate TargetType="ListBoxItem">
+                                        <Border x:Name="TabBorder" Background="#222731" BorderBrush="#333A48" BorderThickness="1,1,1,0"
+                                                CornerRadius="5,5,0,0" Padding="12,4">
+                                            <StackPanel Orientation="Horizontal">
+                                                <TextBlock Text="📕 " FontSize="11" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding TabHeader}" Foreground="#E2E8F0" FontSize="12" FontWeight="Medium" VerticalAlignment="Center"/>
+                                                <Button Content="✕" Tag="{Binding}" Margin="10,0,0,0" Padding="4,0"
+                                                        Background="Transparent" Foreground="#94A3B8" BorderThickness="0"
+                                                        Cursor="Hand" Click="CloseTabButton_Click" ToolTip="Close tab (Ctrl+W) — Can be reopened via '↺ Reopen Tab'"/>
+                                            </StackPanel>
+                                        </Border>
+                                        <ControlTemplate.Triggers>
+                                            <Trigger Property="IsSelected" Value="True">
+                                                <Setter TargetName="TabBorder" Property="Background" Value="#2D3545"/>
+                                                <Setter TargetName="TabBorder" Property="BorderBrush" Value="#E53935"/>
+                                                <Setter TargetName="TabBorder" Property="BorderThickness" Value="1,2,1,0"/>
+                                            </Trigger>
+                                        </ControlTemplate.Triggers>
+                                    </ControlTemplate>
+                                </Setter.Value>
+                            </Setter>
+                        </Style>
+                    </ListBox.ItemContainerStyle>
+                </ListBox>
+
+                <!-- Quick New / Reopen Document Tab Controls -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="4,0,0,0">
+                    <Button Content="➕ Open" Style="{StaticResource ToolBtn}" Padding="7,2" FontSize="11"
+                            Click="OpenPdf_Click" ToolTip="Open a PDF in a new tab (Ctrl+O)"/>
+                    <Button Content="📄 +Sample" Style="{StaticResource ToolBtn}" Padding="7,2" FontSize="11"
+                            Click="NewSamplePdf_Click" ToolTip="Open a new Sample PDF tab"/>
+                    <Button x:Name="BtnReopenClosedTab" Content="↺ Reopen Tab" Style="{StaticResource ToolBtn}" Padding="8,2" FontSize="11"
+                            Visibility="Collapsed" Click="ReopenClosedTab_Click"
+                            Background="#1E3A5F" BorderBrush="#3B82F6" Foreground="#93C5FD"
+                            ToolTip="Reopen most recently closed document tab (Ctrl+Shift+T)"/>
+                </StackPanel>
+
+                <!-- Right Workspace Panel / Tab Toggle & Reopen Bar -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">
+                    <CheckBox x:Name="ShowDetectedTextBlocksCheck" Content="Editable Frames"
+                              Foreground="#94A3B8" VerticalAlignment="Center" Margin="0,0,10,0"
+                              Checked="ShowDetectedTextBlocksCheck_Changed"
+                              Unchecked="ShowDetectedTextBlocksCheck_Changed"/>
+                    <TextBlock Text="Panels:" Foreground="#64748B" FontSize="11" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                    <Button x:Name="BtnTogglePagesTab" Content="📑 Pages" Style="{StaticResource ToolBtn}" Padding="6,2" FontSize="11"
+                            Click="TogglePagesTab_Click" ToolTip="Show or hide the Pages thumbnail tab"/>
+                    <Button x:Name="BtnToggleOutlineTab" Content="🔖 Outline" Style="{StaticResource ToolBtn}" Padding="6,2" FontSize="11"
+                            Click="ToggleOutlineTab_Click" ToolTip="Show or hide the Bookmarks/Outline tab"/>
+                    <Button x:Name="BtnToggleSearchTab" Content="🔍 Search" Style="{StaticResource ToolBtn}" Padding="6,2" FontSize="11"
+                            Click="ToggleSearchTab_Click" ToolTip="Show or hide the Search tab"/>
+                    <Button x:Name="BtnToggleInspector" Content="⚙ Inspector" Style="{StaticResource ToolBtn}" Padding="6,2" FontSize="11"
+                            Click="ToggleRightInspector_Click" ToolTip="Show or hide the Right Properties &amp; Comments panel"/>
+                    <Button x:Name="BtnToggleRibbon" Content="🎀 Ribbon" Style="{StaticResource ToolBtn}" Padding="6,2" FontSize="11"
+                            Click="ToggleRibbon_Click" ToolTip="Show or hide the Top Ribbon toolbar"/>
+                    <Button Content="🔄 Restore All" Style="{StaticResource ToolBtn}" Padding="6,2" FontSize="11"
+                            Click="RestoreAllWorkspaceTabs_Click" ToolTip="Reopen all closed sidebar tabs and panels"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- ==================== 4. MAIN WORKSPACE (PHOTOSHOP DOCK + 3-COLUMN LAYOUT) ==================== -->
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <!-- Photoshop Style Left Vertical Tool Dock -->
+                <ColumnDefinition x:Name="ToolDockColumn" Width="46"/>
+                <!-- Left Navigation Sidebar -->
+                <ColumnDefinition x:Name="LeftSidebarColumn" Width="250" MinWidth="175" MaxWidth="420"/>
+                <ColumnDefinition x:Name="LeftSplitterColumn" Width="4"/>
+                <!-- Center PDF Canvas Viewport -->
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition x:Name="RightSplitterColumn" Width="4"/>
+                <!-- Right Inspector & Comments Sidebar -->
+                <ColumnDefinition x:Name="RightSidebarColumn" Width="315" MinWidth="245" MaxWidth="460"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- PHOTOSHOP STYLE VERTICAL TOOL DOCK -->
+            <Border x:Name="ToolDockBorder" Grid.Column="0" Background="#15181F" BorderBrush="#2A2F3A" BorderThickness="0,0,1,0" Padding="4,6">
+                <ScrollViewer VerticalScrollBarVisibility="Hidden" HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel HorizontalAlignment="Center">
+                        <Button Content="✕" Click="ToggleToolDock_Click" Background="Transparent" Foreground="#64748B"
+                                BorderThickness="0" FontSize="9" Padding="2,0" Cursor="Hand"
+                                ToolTip="Close Tool Dock (Reopen via Window &amp; Tabs menu or Restore All)"/>
+                        <TextBlock Text="TOOLS" FontSize="8.5" FontWeight="Bold" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,0,0,4"/>
+                        <Button x:Name="DockBtnSelect" Style="{StaticResource PsDockToolBtn}" Content="🖱" Click="SelectTool_Click" Tag="Select" ToolTip="Move &amp; Resize Tool (V) — Drag or resize images, signatures, and annotations"/>
+                        <Button x:Name="DockBtnPan" Style="{StaticResource PsDockToolBtn}" Content="✋" Click="SelectTool_Click" Tag="Pan" ToolTip="Hand Pan Tool (H)"/>
+                        <Separator Background="#2B313D" Margin="4,5"/>
+                        <Button x:Name="DockBtnEditText" Style="{StaticResource PsDockToolBtn}" Content="✏" Click="SelectTool_Click" Tag="EditText" ToolTip="Edit PDF Text In-Place"/>
+                        <Button x:Name="DockBtnAddText" Style="{StaticResource PsDockToolBtn}" Content="🔤" Click="SelectTool_Click" Tag="AddText" ToolTip="Add Text Box (T)"/>
+                        <Button Style="{StaticResource PsDockToolBtn}" Content="🖼" Click="InsertImageTool_Click" ToolTip="Insert &amp; Resize Image..."/>
+                        <Button Style="{StaticResource PsDockToolBtn}" Content="✍" Click="OpenSignatureDialog_Click" ToolTip="Fill &amp; Sign Signature..."/>
+                        <Separator Background="#2B313D" Margin="4,5"/>
+                        <Button x:Name="DockBtnHighlight" Style="{StaticResource PsDockToolBtn}" Content="🖍" Click="SelectTool_Click" Tag="Highlight" ToolTip="Highlight Tool"/>
+                        <Button x:Name="DockBtnUnderline" Style="{StaticResource PsDockToolBtn}" Content="U̲" Click="SelectTool_Click" Tag="Underline" ToolTip="Underline Tool"/>
+                        <Button x:Name="DockBtnStrike" Style="{StaticResource PsDockToolBtn}" Content="S̶" Click="SelectTool_Click" Tag="Strikethrough" ToolTip="Strikethrough Tool"/>
+                        <Button x:Name="DockBtnSticky" Style="{StaticResource PsDockToolBtn}" Content="💬" Click="SelectTool_Click" Tag="StickyNote" ToolTip="Sticky Note Tool"/>
+                        <Separator Background="#2B313D" Margin="4,5"/>
+                        <Button x:Name="DockBtnFreehand" Style="{StaticResource PsDockToolBtn}" Content="✒" Click="SelectTool_Click" Tag="Freehand" ToolTip="Brush / Freehand Ink"/>
+                        <Button x:Name="DockBtnRect" Style="{StaticResource PsDockToolBtn}" Content="▭" Click="SelectTool_Click" Tag="Rectangle" ToolTip="Rectangle Shape"/>
+                        <Button x:Name="DockBtnEllipse" Style="{StaticResource PsDockToolBtn}" Content="◯" Click="SelectTool_Click" Tag="Ellipse" ToolTip="Ellipse Shape"/>
+                        <Button x:Name="DockBtnLine" Style="{StaticResource PsDockToolBtn}" Content="↗" Click="SelectTool_Click" Tag="Line" ToolTip="Arrow / Line Tool"/>
+                        <Button x:Name="DockBtnStamp" Style="{StaticResource PsDockToolBtn}" Content="🏷" Click="SelectTool_Click" Tag="Stamp" ToolTip="Rubber Stamp Tool"/>
+                        <Separator Background="#2B313D" Margin="4,5"/>
+                        <Button Style="{StaticResource PsDockToolBtn}" Content="💧" Click="OpenWatermarkDialog_Click" ToolTip="Watermark (Undoable via Ctrl+Z)..."/>
+                        <Button x:Name="DockBtnRedact" Style="{StaticResource PsDockToolBtn}" Content="⬛" Click="SelectTool_Click" Tag="Redact" ToolTip="Mark Area for Redaction"/>
+                        <Button Style="{StaticResource PsDockToolBtn}" Content="↩" Click="Undo_Click" ToolTip="Undo Last Action / Watermark (Ctrl+Z)"/>
+                        <Button Style="{StaticResource PsDockToolBtn}" Content="🚪" Click="ExitApp_Click" Background="#3B1D24" BorderBrush="#7F1D1D" ToolTip="Exit Application"/>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+
+            <!-- LEFT SIDEBAR: Thumbnails, Bookmarks, Search Results -->
+            <Border x:Name="LeftSidebarBorder" Grid.Column="1" Background="#1C2027" BorderBrush="#2B313C" BorderThickness="0,0,1,0">
+                <TabControl x:Name="LeftSidebarTabs" Background="#1C2027" BorderThickness="0" Padding="4">
+                    <!-- Tab 1: Page Thumbnails -->
+                    <TabItem x:Name="LeftTabPages">
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="📑 Pages" VerticalAlignment="Center"/>
+                                <Button Content="✕" Margin="6,0,0,0" Padding="3,0" Background="Transparent"
+                                        Foreground="#94A3B8" BorderThickness="0" Cursor="Hand"
+                                        Click="CloseLeftSidebarTab_Click" Tag="Pages"
+                                        ToolTip="Close Pages tab (Click '📑 Pages' on the top tab bar to reopen)"/>
+                            </StackPanel>
+                        </TabItem.Header>
+                        <Grid Background="#1C2027">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <TextBlock Grid.Row="0" Text="PAGE THUMBNAILS" FontSize="11" FontWeight="Bold"
+                                       Foreground="#94A3B8" Margin="8,6,8,6"/>
+                            <ListBox x:Name="ThumbnailsListBox" Grid.Row="1"
+                                     Background="Transparent" BorderThickness="0"
+                                     SelectionChanged="ThumbnailsListBox_SelectionChanged"
+                                     ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#252A34" BorderBrush="#384152" BorderThickness="1"
+                                                CornerRadius="5" Padding="8" Margin="6,4" Width="200">
+                                            <StackPanel HorizontalAlignment="Center">
+                                                <Border Background="White" BorderBrush="#475569" BorderThickness="1"
+                                                        Width="135" Height="175" ClipToBounds="True">
+                                                    <Image Source="{Binding ThumbnailImage}" Stretch="Uniform"/>
+                                                </Border>
+                                                <TextBlock Text="{Binding Label}" Foreground="#F1F5F9" FontWeight="SemiBold"
+                                                           FontSize="12" HorizontalAlignment="Center" Margin="0,6,0,0"/>
+                                                <TextBlock Text="{Binding DimensionsLabel}" Foreground="#8A94A6"
+                                                           FontSize="10" HorizontalAlignment="Center"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- Tab 2: Bookmarks / Outline -->
+                    <TabItem x:Name="LeftTabOutline">
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔖 Outline" VerticalAlignment="Center"/>
+                                <Button Content="✕" Margin="6,0,0,0" Padding="3,0" Background="Transparent"
+                                        Foreground="#94A3B8" BorderThickness="0" Cursor="Hand"
+                                        Click="CloseLeftSidebarTab_Click" Tag="Outline"
+                                        ToolTip="Close Outline tab (Click '🔖 Outline' on the top tab bar to reopen)"/>
+                            </StackPanel>
+                        </TabItem.Header>
+                        <Grid Background="#1C2027">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <DockPanel Grid.Row="0" Margin="8,6">
+                                <TextBlock Text="BOOKMARKS &amp; SECTIONS" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                                <Button Content="+ Add" Style="{StaticResource ToolBtn}" Padding="6,2" HorizontalAlignment="Right"
+                                        Click="AddBookmark_Click" ToolTip="Bookmark the current page"/>
+                            </DockPanel>
+                            <ListBox x:Name="BookmarksListBox" Grid.Row="1"
+                                     Background="Transparent" BorderThickness="0"
+                                     SelectionChanged="BookmarksListBox_SelectionChanged">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#242933" CornerRadius="4" Padding="8,6" Margin="4,2">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="Auto"/>
+                                                </Grid.ColumnDefinitions>
+                                                <TextBlock Grid.Column="0" Text="{Binding Title}" Foreground="#E2E8F0"
+                                                           FontSize="12" TextTrimming="CharacterEllipsis" ToolTip="{Binding Title}"/>
+                                                <TextBlock Grid.Column="1" Text="{Binding PageLabel}" Foreground="#60A5FA"
+                                                           FontSize="11" FontWeight="SemiBold" Margin="8,0,0,0"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- Tab 3: Search Matches -->
+                    <TabItem x:Name="LeftTabSearch">
+                        <TabItem.Header>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="🔍 Search" VerticalAlignment="Center"/>
+                                <Button Content="✕" Margin="6,0,0,0" Padding="3,0" Background="Transparent"
+                                        Foreground="#94A3B8" BorderThickness="0" Cursor="Hand"
+                                        Click="CloseLeftSidebarTab_Click" Tag="Search"
+                                        ToolTip="Close Search tab (Click '🔍 Search' on the top tab bar to reopen)"/>
+                            </StackPanel>
+                        </TabItem.Header>
+                        <Grid Background="#1C2027">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="Auto"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+
+                            <!-- Sidebar Search Input & Navigation Controls -->
+                            <Border Grid.Row="0" Background="#242934" BorderBrush="#323946" BorderThickness="1"
+                                    CornerRadius="5" Padding="8" Margin="6,6,6,2">
+                                <StackPanel>
+                                    <TextBlock Text="Find Text in Document:" Foreground="#CBD5E1" FontSize="11" Margin="0,0,0,4"/>
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <TextBox x:Name="SidebarSearchBox" Grid.Column="0"
+                                                 Background="#141820" Foreground="#FFFFFF" CaretBrush="#FFFFFF"
+                                                 BorderBrush="#3B82F6" BorderThickness="1" Padding="6,4" FontSize="12"
+                                                 TextChanged="SidebarSearchBox_TextChanged"
+                                                 KeyDown="SidebarSearchBox_KeyDown"
+                                                 ToolTip="Enter search keyword and press Enter"/>
+                                        <Button Grid.Column="1" Content="Find" Style="{StaticResource PrimaryBtn}"
+                                                Padding="10,4" Margin="4,0,0,0" Click="SearchButton_Click"/>
+                                    </Grid>
+                                    <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                        <Button Content="◀ Prev" Style="{StaticResource ToolBtn}" Padding="8,2" Click="PrevSearchMatch_Click"/>
+                                        <Button Content="Next ▶" Style="{StaticResource ToolBtn}" Padding="8,2" Click="NextSearchMatch_Click"/>
+                                        <Button Content="✕ Clear" Style="{StaticResource ToolBtn}" Padding="8,2" Click="ClearSearch_Click"/>
+                                    </StackPanel>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock x:Name="SearchSummaryText" Grid.Row="1" Text="SEARCH RESULTS"
+                                       FontSize="11" FontWeight="Bold" Foreground="#94A3B8" Margin="8,6"/>
+                            <ListBox x:Name="SearchResultsListBox" Grid.Row="2"
+                                     Background="Transparent" BorderThickness="0"
+                                     SelectionChanged="SearchResultsListBox_SelectionChanged"
+                                     PreviewMouseLeftButtonUp="SearchResultsListBox_PreviewMouseLeftButtonUp">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#242933" BorderBrush="#333B49" BorderThickness="1"
+                                                CornerRadius="4" Padding="8,6" Margin="4,3" Cursor="Hand">
+                                            <StackPanel>
+                                                <TextBlock Text="{Binding PageLabel}" Foreground="#FBBF24" FontSize="11" FontWeight="Bold"/>
+                                                <TextBlock Text="{Binding Snippet}" Foreground="#E2E8F0" FontSize="11.5"
+                                                           TextWrapping="Wrap" Margin="0,2,0,0"/>
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Border>
+
+            <GridSplitter x:Name="LeftGridSplitter" Grid.Column="2" Width="4" HorizontalAlignment="Stretch" Background="#262B35"/>
+
+            <!-- CENTER VIEWPORT: High-DPI PDF Page + Interactive WYSIWYG Annotation & Text-Edit Layer -->
+            <Border Grid.Column="3" Background="#282C34" ClipToBounds="True">
+                <Grid>
+                    <!-- Instruction Banner when in Edit PDF Text or Redact mode -->
+                    <Border x:Name="ModeBanner" VerticalAlignment="Top" HorizontalAlignment="Center"
+                            Panel.ZIndex="20" Margin="0,10,0,0" Padding="14,6" CornerRadius="16"
+                            Background="#E61E293B" BorderBrush="#3B82F6" BorderThickness="1" Visibility="Collapsed">
+                        <TextBlock x:Name="ModeBannerText" Text="Edit PDF Text Mode: Click any dashed blue text line on the page to edit its text in-place."
+                                   Foreground="#F8FAFC" FontSize="12" FontWeight="SemiBold"/>
+                    </Border>
+
+                    <!-- Empty State Overlay when all Document Tabs are closed -->
+                    <Border x:Name="EmptyWorkspaceOverlay" Panel.ZIndex="15" Background="#20242C" Visibility="Collapsed">
+                        <Border Background="#181C23" BorderBrush="#2E3646" BorderThickness="1" CornerRadius="10"
+                                Padding="36,28" HorizontalAlignment="Center" VerticalAlignment="Center" MaxWidth="460">
+                            <StackPanel HorizontalAlignment="Center">
+                                <Image Source="pack://application:,,,/Assets/ArcoCatIcon.png" Width="64" Height="64" Margin="0,0,0,10"/>
+                                <TextBlock Text="No Open Document Tabs" FontSize="18" FontWeight="Bold"
+                                           Foreground="#F8FAFC" HorizontalAlignment="Center"/>
+                                <TextBlock Text="All PDF document tabs have been closed. You can reopen your recently closed tab, open a PDF file from disk, or generate a new sample PDF."
+                                           Foreground="#94A3B8" FontSize="12.5" TextAlignment="Center"
+                                           TextWrapping="Wrap" Margin="0,8,0,18"/>
+                                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                    <Button x:Name="BtnEmptyReopenTab" Content="↺ Reopen Closed Tab" Style="{StaticResource PrimaryBtn}"
+                                            Padding="12,7" Margin="4,0" Click="ReopenClosedTab_Click" Visibility="Collapsed"/>
+                                    <Button Content="📂 Open PDF File..." Style="{StaticResource ToolBtn}"
+                                            Padding="12,7" Margin="4,0" Click="OpenPdf_Click"/>
+                                    <Button Content="📄 New Sample PDF" Style="{StaticResource ToolBtn}"
+                                            Padding="12,7" Margin="4,0" Click="NewSamplePdf_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+                    </Border>
+
+                    <ScrollViewer x:Name="PageScrollViewer"
+                                  HorizontalScrollBarVisibility="Auto"
+                                  VerticalScrollBarVisibility="Auto"
+                                  PreviewMouseWheel="PageScrollViewer_PreviewMouseWheel">
+                        <Grid HorizontalAlignment="Center" VerticalAlignment="Center" Margin="32">
+                            <!-- Drop Shadow & Page Paper Surface -->
+                            <Border x:Name="PagePaperBorder" Background="White"
+                                    BorderBrush="#0F172A" BorderThickness="1">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="22" ShadowDepth="4" Opacity="0.55" Color="Black"/>
+                                </Border.Effect>
+
+                                <!-- Scaled Page Coordinate Container (72-DPI points * ZoomLevel) -->
+                                <Grid x:Name="PageStageGrid" Width="612" Height="792">
+                                    <Grid.LayoutTransform>
+                                        <ScaleTransform x:Name="PageScaleTransform" ScaleX="1.25" ScaleY="1.25"/>
+                                    </Grid.LayoutTransform>
+
+                                    <!-- Underlying Rendered PDF Bitmap -->
+                                    <Image x:Name="PdfPageImage" Stretch="Fill"
+                                           RenderOptions.BitmapScalingMode="HighQuality"/>
+
+                                    <!-- Interactive Overlay Canvas (Coordinates in 72-DPI page points) -->
+                                    <Canvas x:Name="OverlayCanvas" Background="Transparent"
+                                            ClipToBounds="True"
+                                            MouseLeftButtonDown="OverlayCanvas_MouseLeftButtonDown"
+                                            MouseMove="OverlayCanvas_MouseMove"
+                                            MouseLeftButtonUp="OverlayCanvas_MouseLeftButtonUp"/>
+                                </Grid>
+                            </Border>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <GridSplitter x:Name="RightGridSplitter" Grid.Column="4" Width="4" HorizontalAlignment="Stretch" Background="#262B35"/>
+
+            <!-- RIGHT SIDEBAR: Properties Inspector, Annotations List & Document Info -->
+            <Border x:Name="RightSidebarBorder" Grid.Column="5" Background="#1C2027" BorderBrush="#2B313C" BorderThickness="1,0,0,0" Padding="12">
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <!-- Inspector Section -->
+                        <DockPanel Margin="0,0,0,8">
+                            <TextBlock Text="ELEMENT &amp; TOOL PROPERTIES" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                            <Button Content="✕" HorizontalAlignment="Right" Padding="5,1" FontSize="10.5"
+                                    Style="{StaticResource ToolBtn}" Click="ToggleRightInspector_Click"
+                                    ToolTip="Close Properties Inspector panel (Click '⚙ Inspector' on the tab bar to reopen)"/>
+                        </DockPanel>
+
+                        <Border Background="#242934" BorderBrush="#323946" BorderThickness="1" CornerRadius="6" Padding="10" Margin="0,0,0,14">
+                            <StackPanel>
+                                <TextBlock x:Name="SelectedElementTypeLabel" Text="Active Tool Settings / No Selection"
+                                           FontWeight="Bold" FontSize="12.5" Foreground="#60A5FA" Margin="0,0,0,8"/>
+
+                                <TextBlock Text="Text / Comment Content:" Foreground="#CBD5E1" FontSize="11.5" Margin="0,0,0,3"/>
+                                <TextBox x:Name="PropTextBox" Height="56" TextWrapping="Wrap" AcceptsReturn="True"
+                                         Background="#181C23" Foreground="#F8FAFC" BorderBrush="#3B4252" Padding="6,4"
+                                         TextChanged="PropTextBox_TextChanged"/>
+
+                                <!-- Dimensions (Width & Height) for Resizing Images, Signatures & Shapes -->
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Width (pt):" Foreground="#CBD5E1" FontSize="11.5" Margin="0,0,0,3"/>
+                                        <TextBox x:Name="PropWidthBox" Text="180" Padding="5,3"
+                                                 Background="#181C23" Foreground="#F8FAFC" BorderBrush="#3B4252"
+                                                 TextChanged="PropSizeBox_TextChanged"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Height (pt):" Foreground="#CBD5E1" FontSize="11.5" Margin="0,0,0,3"/>
+                                        <TextBox x:Name="PropHeightBox" Text="120" Padding="5,3"
+                                                 Background="#181C23" Foreground="#F8FAFC" BorderBrush="#3B4252"
+                                                 TextChanged="PropSizeBox_TextChanged"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="4" VerticalAlignment="Bottom">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Button Content="−15%" Style="{StaticResource ToolBtn}" Padding="6,4" Click="ScaleDownSelected_Click" ToolTip="Scale selected image/item down by 15%"/>
+                                            <Button Content="+15%" Style="{StaticResource ToolBtn}" Padding="6,4" Click="ScaleUpSelected_Click" ToolTip="Scale selected image/item up by 15%"/>
+                                        </StackPanel>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Margin="0,8,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="85"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Font Family:" Foreground="#CBD5E1" FontSize="11.5" Margin="0,0,0,3"/>
+                                        <ComboBox x:Name="PropFontFamilyCombo" SelectedIndex="0" SelectionChanged="PropFontFamilyCombo_SelectionChanged">
+                                            <ComboBoxItem Content="Arial"/>
+                                            <ComboBoxItem Content="Segoe UI"/>
+                                            <ComboBoxItem Content="Times New Roman"/>
+                                            <ComboBoxItem Content="Calibri"/>
+                                            <ComboBoxItem Content="Courier New"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Size (pt):" Foreground="#CBD5E1" FontSize="11.5" Margin="0,0,0,3"/>
+                                        <TextBox x:Name="PropFontSizeBox" Text="12" Padding="5,3"
+                                                 Background="#181C23" Foreground="#F8FAFC" BorderBrush="#3B4252"
+                                                 TextChanged="PropFontSizeBox_TextChanged"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,8,0,0">
+                                    <CheckBox x:Name="PropBoldCheck" Content="Bold" Foreground="#E2E8F0" Margin="0,0,16,0"
+                                              Checked="PropStyleCheck_Changed" Unchecked="PropStyleCheck_Changed"/>
+                                    <CheckBox x:Name="PropItalicCheck" Content="Italic" Foreground="#E2E8F0"
+                                              Checked="PropStyleCheck_Changed" Unchecked="PropStyleCheck_Changed"/>
+                                </StackPanel>
+
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="8"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Text / Stroke Color:" Foreground="#CBD5E1" FontSize="11.5" Margin="0,0,0,3"/>
+                                        <ComboBox x:Name="PropStrokeColorCombo" SelectedIndex="0" SelectionChanged="PropColorCombo_SelectionChanged">
+                                            <ComboBoxItem Content="Dark Ink (#1E293B)" Tag="#1E293B"/>
+                                            <ComboBoxItem Content="Crimson Red (#E53935)" Tag="#E53935"/>
+                                            <ComboBoxItem Content="Royal Blue (#1D4ED8)" Tag="#1D4ED8"/>
+                                            <ComboBoxItem Content="Emerald (#15803D)" Tag="#15803D"/>
+                                            <ComboBoxItem Content="Purple (#7E22CE)" Tag="#7E22CE"/>
+                                            <ComboBoxItem Content="Orange (#EA580C)" Tag="#EA580C"/>
+                                        </ComboBox>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Fill / Highlight:" Foreground="#CBD5E1" FontSize="11.5" Margin="0,0,0,3"/>
+                                        <ComboBox x:Name="PropFillColorCombo" SelectedIndex="0" SelectionChanged="PropColorCombo_SelectionChanged">
+                                            <ComboBoxItem Content="Yellow (#FFEB3B)" Tag="#FFEB3B"/>
+                                            <ComboBoxItem Content="Mint Green (#86EFAC)" Tag="#86EFAC"/>
+                                            <ComboBoxItem Content="Sky Blue (#93C5FD)" Tag="#93C5FD"/>
+                                            <ComboBoxItem Content="Rose Pink (#F9A8D4)" Tag="#F9A8D4"/>
+                                            <ComboBoxItem Content="White (#FFFFFF)" Tag="#FFFFFF"/>
+                                            <ComboBoxItem Content="Transparent" Tag="Transparent"/>
+                                        </ComboBox>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Grid Margin="0,10,0,0">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <StackPanel Grid.Column="0">
+                                        <TextBlock Text="Stroke Width:" Foreground="#CBD5E1" FontSize="11.5"/>
+                                        <Slider x:Name="PropThicknessSlider" Minimum="1" Maximum="12" Value="2"
+                                                ValueChanged="PropSliders_ValueChanged"/>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Column="2">
+                                        <TextBlock Text="Opacity:" Foreground="#CBD5E1" FontSize="11.5"/>
+                                        <Slider x:Name="PropOpacitySlider" Minimum="0.15" Maximum="1.0" Value="1.0"
+                                                ValueChanged="PropSliders_ValueChanged"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                    <Button Content="📋 Duplicate Item" Style="{StaticResource ToolBtn}" Click="DuplicateAnnotation_Click" Margin="0,0,6,0"/>
+                                    <Button Content="🗑 Delete Selected" Style="{StaticResource ToolBtn}" Background="#451A1A" BorderBrush="#7F1D1D" Click="DeleteAnnotation_Click"/>
+                                </StackPanel>
+                            </StackPanel>
+                        </Border>
+
+                        <!-- Annotations & Edits List -->
+                        <DockPanel Margin="0,0,0,6">
+                            <TextBlock Text="COMMENTS &amp; EDITS ON DOCUMENT" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" VerticalAlignment="Center"/>
+                            <Button Content="Clear Page" Style="{StaticResource ToolBtn}" Padding="6,2" HorizontalAlignment="Right"
+                                    Click="ClearPageAnnotations_Click" ToolTip="Remove all unflattened annotations on the current page"/>
+                        </DockPanel>
+
+                        <ListBox x:Name="AnnotationsListBox" Height="230"
+                                 Background="#161920" BorderBrush="#2E3440" BorderThickness="1"
+                                 SelectionChanged="AnnotationsListBox_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#232834" CornerRadius="4" Padding="7,5" Margin="2">
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="Auto"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Border Grid.Column="0" Background="#3B82F6" CornerRadius="3" Padding="5,1" Margin="0,0,7,0" VerticalAlignment="Top">
+                                                <TextBlock Text="{Binding PageDisplay}" Foreground="White" FontSize="10" FontWeight="Bold"/>
+                                            </Border>
+                                            <StackPanel Grid.Column="1">
+                                                <TextBlock Text="{Binding ToolDisplayName}" Foreground="#93C5FD" FontSize="11" FontWeight="SemiBold"/>
+                                                <TextBlock Text="{Binding SummaryText}" Foreground="#E2E8F0" FontSize="11.5" TextTrimming="CharacterEllipsis"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </Border>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+
+                        <!-- Document Metadata Summary -->
+                        <TextBlock Text="DOCUMENT PROPERTIES" FontSize="11" FontWeight="Bold" Foreground="#94A3B8" Margin="0,14,0,6"/>
+                        <Border Background="#242934" BorderBrush="#323946" BorderThickness="1" CornerRadius="6" Padding="10">
+                            <StackPanel>
+                                <TextBlock x:Name="DocInfoTitle" Text="Title: -" Foreground="#E2E8F0" FontSize="11.5" TextTrimming="CharacterEllipsis" Margin="0,0,0,3"/>
+                                <TextBlock x:Name="DocInfoAuthor" Text="Author: -" Foreground="#94A3B8" FontSize="11.5" Margin="0,0,0,3"/>
+                                <TextBlock x:Name="DocInfoPageSize" Text="Page Size: 8.5 x 11.0 in (612 x 792 pt)" Foreground="#94A3B8" FontSize="11.5" Margin="0,0,0,3"/>
+                                <TextBlock x:Name="DocInfoVersion" Text="PDF Version: 1.7" Foreground="#94A3B8" FontSize="11.5"/>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Grid>
+
+        <!-- ==================== 5. BOTTOM STATUS & ZOOM BAR ==================== -->
+        <Border Grid.Row="5" Background="#121418" BorderBrush="#2A2F3A" BorderThickness="0,1,0,0" Padding="12,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <!-- Left Status & Cursor Coordinates -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <TextBlock x:Name="StatusTextBlock" Text="Ready — ArcoCat PDF Editor loaded" Foreground="#94A3B8" FontSize="11.5"/>
+                    <TextBlock Text="   |   " Foreground="#3B4252"/>
+                    <TextBlock x:Name="CursorCoordsText" Text="X: 0 pt, Y: 0 pt" Foreground="#64748B" FontSize="11.5"/>
+                </StackPanel>
+
+                <!-- Center Page Navigation Controls -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Content="⏮" Style="{StaticResource ToolBtn}" Padding="6,2" Click="FirstPage_Click" ToolTip="First Page"/>
+                    <Button Content="◀ Prev" Style="{StaticResource ToolBtn}" Padding="8,2" Click="PrevPage_Click" ToolTip="Previous Page (PageUp)"/>
+                    <Border Background="#20252E" BorderBrush="#363D49" BorderThickness="1" CornerRadius="4" Padding="10,2" Margin="4,0">
+                        <TextBlock x:Name="PageIndicatorText" Text="Page 1 of 3" Foreground="#F8FAFC" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    </Border>
+                    <Button Content="Next ▶" Style="{StaticResource ToolBtn}" Padding="8,2" Click="NextPage_Click" ToolTip="Next Page (PageDown)"/>
+                    <Button Content="⏭" Style="{StaticResource ToolBtn}" Padding="6,2" Click="LastPage_Click" ToolTip="Last Page"/>
+                </StackPanel>
+
+                <!-- Right Zoom Controls + Window Resize Grip -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button Content="Fit Page" Style="{StaticResource ToolBtn}" Padding="7,2" Click="FitPage_Click"/>
+                    <Button Content="Fit Width" Style="{StaticResource ToolBtn}" Padding="7,2" Click="FitWidth_Click"/>
+                    <Button Content="−" Style="{StaticResource ToolBtn}" Padding="7,2" Click="ZoomOut_Click"/>
+                    <Slider x:Name="ZoomSlider" Width="110" Minimum="0.5" Maximum="3.0" Value="1.25"
+                            VerticalAlignment="Center" Margin="6,0"
+                            ValueChanged="ZoomSlider_ValueChanged"/>
+                    <Button Content="+" Style="{StaticResource ToolBtn}" Padding="7,2" Click="ZoomIn_Click"/>
+                    <TextBlock x:Name="ZoomPercentText" Text="125%" Width="44" TextAlignment="Right"
+                               Foreground="#E2E8F0" FontSize="11.5" FontWeight="SemiBold" VerticalAlignment="Center"/>
+                    <Thumb Width="18" Height="22" Margin="10,0,0,0" Cursor="SizeNWSE"
+                           DragDelta="WindowResizeThumb_DragDelta"
+                           ToolTip="Drag to resize window">
+                        <Thumb.Template>
+                            <ControlTemplate TargetType="Thumb">
+                                <Border Background="Transparent">
+                                    <TextBlock Text="◢" Foreground="#64748B" FontSize="13"
+                                               HorizontalAlignment="Right" VerticalAlignment="Bottom"/>
+                                </Border>
+                            </ControlTemplate>
+                        </Thumb.Template>
+                    </Thumb>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

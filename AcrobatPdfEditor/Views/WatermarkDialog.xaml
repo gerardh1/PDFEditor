@@ -1,0 +1,94 @@
+<Window x:Class="AcrobatPdfEditor.Views.WatermarkDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Add Watermark — ArcoCat PDF Editor"
+        Icon="pack://application:,,,/Assets/ArcoCatIcon.ico"
+        Width="460" Height="390"
+        MinWidth="420" MinHeight="350"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="CanResize"
+        Background="#1E222A"
+        Foreground="#F0F4F8">
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="0,0,0,14">
+            <TextBlock Text="Document Watermark Settings" FontSize="17" FontWeight="Bold" Foreground="#FFFFFF"/>
+            <TextBlock Text="Configure diagonal or horizontal watermark text across pages."
+                       FontSize="12" Foreground="#9AA5B4" Margin="0,3,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="1">
+            <TextBlock Text="Watermark Text:" Foreground="#CBD5E1" FontSize="12" Margin="0,0,0,4"/>
+            <ComboBox x:Name="WatermarkTextBox" IsEditable="True" Text="CONFIDENTIAL" FontSize="13" Padding="6,4" Margin="0,0,0,12">
+                <ComboBoxItem Content="CONFIDENTIAL"/>
+                <ComboBoxItem Content="DRAFT — DO NOT DISTRIBUTE"/>
+                <ComboBoxItem Content="APPROVED"/>
+                <ComboBoxItem Content="INTERNAL USE ONLY"/>
+                <ComboBoxItem Content="SAMPLE DOCUMENT"/>
+                <ComboBoxItem Content="VOID"/>
+            </ComboBox>
+
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Color:" Foreground="#CBD5E1" FontSize="12" Margin="0,0,0,4"/>
+                    <ComboBox x:Name="ColorCombo" SelectedIndex="0" Padding="6,4">
+                        <ComboBoxItem Content="Crimson Red (#D32F2F)" Tag="#D32F2F"/>
+                        <ComboBoxItem Content="Slate Gray (#475569)" Tag="#475569"/>
+                        <ComboBoxItem Content="Navy Blue (#1D4ED8)" Tag="#1D4ED8"/>
+                        <ComboBoxItem Content="Forest Green (#15803D)" Tag="#15803D"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Font Size (pt):" Foreground="#CBD5E1" FontSize="12" Margin="0,0,0,4"/>
+                    <TextBox x:Name="FontSizeBox" Text="56" Padding="6,4" FontSize="13"/>
+                </StackPanel>
+            </Grid>
+
+            <Grid Margin="0,0,0,12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="14"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Rotation Angle:" Foreground="#CBD5E1" FontSize="12" Margin="0,0,0,4"/>
+                    <ComboBox x:Name="AngleCombo" SelectedIndex="0" Padding="6,4">
+                        <ComboBoxItem Content="Diagonal (-35°)" Tag="-35"/>
+                        <ComboBoxItem Content="Diagonal (+35°)" Tag="35"/>
+                        <ComboBoxItem Content="Horizontal (0°)" Tag="0"/>
+                    </ComboBox>
+                </StackPanel>
+
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="Opacity (10% - 80%):" Foreground="#CBD5E1" FontSize="12" Margin="0,0,0,4"/>
+                    <Slider x:Name="OpacitySlider" Minimum="0.10" Maximum="0.80" Value="0.22" TickFrequency="0.05" Margin="0,6,0,0"/>
+                </StackPanel>
+            </Grid>
+
+            <CheckBox x:Name="AllPagesCheck" Content="Apply watermark to all pages in document" IsChecked="True"
+                      Foreground="#E2E8F0" Margin="0,4,0,0"/>
+        </StackPanel>
+
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,14,0,0">
+            <Button Content="Cancel" Width="90" Height="32" Margin="0,0,10,0"
+                    Background="#2D333F" Foreground="#E2E8F0" BorderThickness="0"
+                    Click="CancelButton_Click"/>
+            <Button Content="Apply Watermark" Width="140" Height="32"
+                    Background="#E53935" Foreground="White" FontWeight="Bold" BorderThickness="0"
+                    Click="ApplyButton_Click"/>
+        </StackPanel>
+    </Grid>
+</Window>
